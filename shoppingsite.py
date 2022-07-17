@@ -6,7 +6,8 @@ put melons in a shopping cart.
 Authors: Joel Burton, Christian Fernandez, Meggie Mahnken, Katie Byers.
 """
 
-from flask import Flask, render_template, redirect, flash
+
+from flask import Flask, render_template, redirect, flash, session
 import jinja2
 
 import melons
@@ -14,7 +15,7 @@ import melons
 app = Flask(__name__)
 
 # A secret key is needed to use Flask sessioning features
-app.secret_key = 'this-should-be-something-unguessable'
+app.secret_key = '225298d130f93c5e75566114c6b03093dde1d73ec6e347c17e477ebc9448d1bd'
 
 # Normally, if you refer to an undefined variable in a Jinja template,
 # Jinja silently ignores this. This makes debugging difficult, so we'll
@@ -50,7 +51,7 @@ def show_melon(melon_id):
     Show all info about a melon. Also, provide a button to buy that melon.
     """
 
-    melon = melons.get_by_id("meli")
+    melon = melons.get_by_id(melon_id)
     print(melon)
     return render_template("melon_details.html",
                            display_melon=melon)
@@ -61,7 +62,21 @@ def show_shopping_cart():
     """Display content of shopping cart."""
 
     # TODO: Display the contents of the shopping cart.
-
+    cart_total = 0
+    
+    cart = session.get('cart', {})
+    cart_list = []
+    
+    for melon_id, quantity in cart.items():
+        melon = melon.get_by_id(melon_id)
+        
+        total = quantity * melon.price
+        cart_total += total
+        
+        melon.quantity = quantity
+        melon.total = total
+        
+        cart_list.append(melon)
     # The logic here will be something like:
     #
     # - get the cart dictionary from the session
@@ -78,7 +93,9 @@ def show_shopping_cart():
     # Make sure your function can also handle the case wherein no cart has
     # been added to the session
 
-    return render_template("cart.html")
+    return render_template("cart.html", 
+                           cart=cart_list,
+                           cart_total=cart_total)
 
 
 @app.route("/add_to_cart/<melon_id>")
@@ -90,7 +107,15 @@ def add_to_cart(melon_id):
     cart'."""
 
     # TODO: Finish shopping cart functionality
-
+    if 'cart' in session:
+        cart = session['cart']
+    else:
+        cart = session['cart'] = {}
+        
+    cart[melon_id] = cart.get(melon_id, 0) + 1
+    
+    flash("Melon added to cart")
+    
     # The logic here should be something like:
     #
     # - check if a "cart" exists in the session, and create one (an empty
@@ -100,7 +125,7 @@ def add_to_cart(melon_id):
     # - flash a success message
     # - redirect the user to the cart page
 
-    return "Oops! This needs to be implemented!"
+    return redirect('/cart')
 
 
 @app.route("/login", methods=["GET"])

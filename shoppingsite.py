@@ -114,7 +114,7 @@ def add_to_cart(melon_id):
         
     cart[melon_id] = cart.get(melon_id, 0) + 1
     
-    flash("Melon added to cart")
+    flash("Item added to cart")
     
     # The logic here should be something like:
     #

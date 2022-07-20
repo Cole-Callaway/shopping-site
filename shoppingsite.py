@@ -68,7 +68,7 @@ def show_shopping_cart():
     cart_list = []
     
     for melon_id, quantity in cart.items():
-        melon = melon.get_by_id(melon_id)
+        melon = melons.get_by_id(melon_id)
         
         total = quantity * melon.price
         cart_total += total
